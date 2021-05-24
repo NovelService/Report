@@ -16,7 +16,7 @@ But a java programm which relies on the user having an js CLI tool, thus nodejs 
 
 
 ## Problem definition half-full page
-With that in mind i wanted to make use of Docker by defining my own containers which had the necessary CLI tool pre-installed. In order to make it more interesting and to meet the complexity requiremetns of the lecture, I wanted to make a add all the "new and cool" stuff that everyone is talking about.  
+With that in mind i wanted to make use of Docker by defining my own containers which had the necessary CLI tool pre-installed. In order to make it more interesting and to meet the complexity requirements of the lecture, I wanted to make a add all the "new and cool" stuff around a real project.  
 More specifically this means:
 
 1. Scalability by seperating web extraction & ebook generation from the web API
@@ -67,6 +67,7 @@ I also decided to remove the postgres dependecy from the worker and instead comm
 Although not really part of the curriculum, this is something that naturally comes with splitting up the codebase and thus included here.  
 In order to allow importing the message definition of the worker service into the rest api service, the dependency has to be available through one of the maven repositories. Because i don't have a domain to register my packages under MavenCentral, i went with [JitPack](https://jitpack.io/). They build the project and serve the build artifacts free for open source. They even allow to only select specific submodules of a project, which i made use of. 
 Both project consist of following modules now:
+
 1. api: It contains the data format they expect when communicating with them, in short their data transfer objects (dto).
 2. application: The application itself, so everything from spring boot, configuration parsing, database integration, controller, services, repositories. Basically everything.
 3. docker: It contains a dockerfile from which an image will be build with the jar from the application module
@@ -81,6 +82,9 @@ Before the multi module setup it would also generate it fat jar, a jar which con
 Here is used GitHub actions, because I'm very familiar with it and it's free for open source. The current version can be found [here](https://github.com/NovelService/NovelWorker/blob/49f7d10a78093dfaa0c7c71fbcea56b83f56ec13/.github/workflows/ci.yml) and in short it runs `mvn install` to build and test and `docker push` to publish the image.  
 
 Each job runs as a seperate job, `mvn install` on push and pr, `docker push` only on push. But because each job has a completly new enviroment my `docker push` job didn't have access to the image from the `mvn install` job. I decided to solve it with the `upload-artifact` and `download-artifact` actions over just building it again, because I did want to add a job for end-to-end tests in the future, which would also need the image.
+
+The images can fe found https://hub.docker.com/repository/docker/xiangronglin/novel-rest and https://hub.docker.com/repository/docker/xiangronglin/novel-worker
+A new image currently just overrides the old one, which is fine for now, in order to not create too many images while it is still in the early stages of development.
 
 ### CD Deploy to the cloud
 TODO Seperate repo, trigger from worker and rest with repository_deploy event
