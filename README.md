@@ -16,10 +16,33 @@ But a java programm which relies on the user having an js CLI tool, thus nodejs 
 
 
 ## Problem definition half-full page
+With that in mind i wanted to make use of Docker by defining my own containers which had the necessary CLI tool pre-installed. In order to make it more interesting and to meet the complexity requiremetns of the lecture, I wanted to make a add all the "new and cool" stuff that everyone is talking about.  
+More specifically this means:
+
+1. Scalability by seperating web extraction & ebook generation from the web API
+2. Easy setup of the development enviroment
+3. Docker image with CLI tools installed
+4. CI pipeline which builds, tests and publishes artifacts (Tests themselve not included)
+5. CD pipeline to deploy to the web
 
 
 ## Approach full page
+### Scalability by seperating web extraction & ebook generation from the web API
+For the minimal viable product I wrote everything in a single codebase. But in order to allow extraction into a seperate microservice, an api call would trigger an message into the messaging system, which in turn would trigger the extraction and generation. This allowed me to painlessly split it up afterwards into a rest api and worker service.
 
+### Easy setup of the development enviroment
+Here i used `docker compose`, because it's something that I already knew very well and could do quickly in order to not spend too much time here. In order to allow different configurations between the local dev and the production environment all config is done through files. The config files for the local dev environment would be provided and configured accordingly to the dependecies in `docker compose`.  
+So in order to run the projects and get a running version locally for development one can simply follow the steps described in the readme.
+
+### Docker image with CLI tools installed
+I already knew which tools I needed by documenting it in the readme. So the only thing to do was to declare the installation in the Dockerfile.
+
+### CI pipeline which builds, tests and publishes artifacts (Tests themselve not included)
+I wanted to have an CI pipeline which would build the project and run their non-existant tests on every push to master an pull request. Additionally it would publish the maven artifacts and docker images, so that the rest api could access the worker.  
+Tests themself were excluded because they are not part of the curriculum of this lecture and would take too much time.
+
+### CD pipeline to deploy to the web
+Lasty I wanted to be able to use all of this from anywhere and maybe even an adjusted Novel2Go app. So it would need to be deployed somewhere. Ideally a single rest api instance and worker instance would be running at all times, with the possibility to scale the worker up based on usage.
 
 ### Architecturediagram
 
