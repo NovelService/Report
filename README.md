@@ -28,7 +28,8 @@ More specifically this means:
 
 ## Approach full page
 ### Scalability by seperating web extraction & ebook generation from the web API
-For the minimal viable product I wrote everything in a single codebase. But in order to allow extraction into a seperate microservice, an api call would trigger an message into the messaging system, which in turn would trigger the extraction and generation. This allowed me to painlessly split it up afterwards into a rest api and worker service.
+I'm assuming that for a given job the worker will experience a way bigger workload than the api. Thus a single rest api instance could serve multiple worker instances.  
+For the minimal viable product I wrote everything in a single codebase. An api call would trigger an message into the messaging system, which in turn would trigger the extraction and generation. The resulting ebook would be saved to disk and returned by the rest api. This allowed me to painlessly split it up afterwards into a rest api and worker service.
 
 ### Easy setup of the development enviroment
 Here i used `docker compose`, because it's something that I already knew very well and could do quickly in order to not spend too much time here. In order to allow different configurations between the local dev and the production environment all config is done through files. The config files for the local dev environment would be provided and configured accordingly to the dependecies in `docker compose`.  
@@ -47,9 +48,44 @@ Lasty I wanted to be able to use all of this from anywhere and maybe even an adj
 ### Architecturediagram
 
 ## Implementation 1-2 pages
+Here I describe my implementation and problems of the project, which occured roughly in the outlined order.
 
- 
-## Relation to lecture 1-2 pages
+### Monolith
+The beginning was comparatively easy.  
+A docker-compose.yml with amq and postgres, although i stumbled a bit, because amq does no provide official images. Instead I used [rrmohr/activemq](https://hub.docker.com/r/rmohr/activemq/), which received it's last update 2 years ago.  
+Then a maven project with kotlin and spring boot for rapid initial development. Configure it to the local amq and postgres instances and make sure to pass it in through files from outside. Add some endpoint to trigger and fetch results.  
+Then copy over the Novel2GoExtractor code and try not to wonder what past me was thinking writing that piece of code.
+
+### Dockerization
+The part of installing readability and calibre that i portrayed as pretty easy turned out to be way more annoying than expected. After many trial and error attempts, because libraries were missing or outdated, I finally settled on a working version which can be found [here](https://github.com/NovelService/NovelWorker/blob/49f7d10a78093dfaa0c7c71fbcea56b83f56ec13/novel-worker-docker/Dockerfile). It felt like in the nodejs world. Just simply install everything that you need and don't wonder about the huge `node_modules` folder, in this case the __1.1GB__ image.
+
+### Microservices
+This part also went comparetivly easy. Because i already implemented the monolith to work through the messaging system i could nearly just create a new spring boot project and copy over the infratructure and worker code. Only problem was the definition of the message format would have to be copied, in order to be available in both projects. This i solved in my point below.  
+I also decided to remove the postgres dependecy from the worker and instead communicate the completion of a job through a message back. The rest api would then save the completion into the database. This way the only way to communicate with the worker is through the messaging system. The ebooks would still be saved to disk, where i had to make sure they were mounted to the same folder for both services.
+
+### Multi module maven project
+Although not really part of the curriculum, this is something that naturally comes with splitting up the codebase and thus included here.  
+In order to allow importing the message definition of the worker service into the rest api service, the dependency has to be available through one of the maven repositories. Because i don't have a domain to register my packages under MavenCentral, i went with [JitPack](https://jitpack.io/). They build the project and serve the build artifacts free for open source. They even allow to only select specific submodules of a project, which i made use of. 
+Both project consist of following modules now:
+1. api: It contains the data format they expect when communicating with them, in short their data transfer objects (dto).
+2. application: The application itself, so everything from spring boot, configuration parsing, database integration, controller, services, repositories. Basically everything.
+3. docker: It contains a dockerfile from which an image will be build with the jar from the application module
+
+With this the rest api import the api module of the worker service like [this](https://github.com/NovelService/NovelRest/blob/ed3b2e825d64eef93112e7150f9eb4b7e33c4870/pom.xml#L46).
+
+I had big problems with the dependecy version not being inherited to the submodule. In the single module setup one would define `spring-boot-starter-parent` as parent, which then would set all version. But that somehow didn't work in the multi module setup. So after wasting some time, I settled with looking up the compatible version from the parent pom and declaring them myself.
+
+Before the multi module setup it would also generate it fat jar, a jar which contains all necessary dependencies. This had to be configured afterwards.
+
+### CI build, test, publish
+Here is used GitHub actions, because I'm very familiar with it and it's free for open source. The current version can be found [here](https://github.com/NovelService/NovelWorker/blob/49f7d10a78093dfaa0c7c71fbcea56b83f56ec13/.github/workflows/ci.yml) and in short it runs `mvn install` to build and test and `docker push` to publish the image.  
+
+Each job runs as a seperate job, `mvn install` on push and pr, `docker push` only on push. But because each job has a completly new enviroment my `docker push` job didn't have access to the image from the `mvn install` job. I decided to solve it with the `upload-artifact` and `download-artifact` actions over just building it again, because I did want to add a job for end-to-end tests in the future, which would also need the image.
+
+### CD Deploy to the cloud
+TODO Seperate repo, trigger from worker and rest with repository_deploy event
+
+## Evaluation in relation to lecture 1-2 pages
 
 
 ## Conclusion half-full page
