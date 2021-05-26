@@ -1,0 +1,40 @@
+version: '3.9'
+services:
+  postgres:
+    image: postgres:13.2-alpine
+    hostname: postgres
+    restart: always
+    volumes:
+      - postgresdata:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=novel
+      - POSTGRES_PASSWORD=novel
+      - POSTGRES_DB=novel
+    ports:
+      - 5432:5432
+  amq:
+    image: rmohr/activemq:5.15.9-alpine
+    hostname: amq
+    restart: always
+    ports:
+      - 61616:61616
+      - 8161:8161
+
+  novel-worker:
+    image: xiangronglin/novel-worker:latest
+    volumes:
+      - ${project_root}/data:/novel
+      - ${project_root}/config/novel-worker:/config
+
+  novel-rest:
+    image: xiangronglin/novel-rest:latest
+    volumes:
+      - ${project_root}/data:/novel
+      - ${project_root}/config/novel-rest:/config
+    ports:
+      - 8080:8080
+  
+
+volumes:
+  postgresdata:
+
