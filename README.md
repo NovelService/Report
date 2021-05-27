@@ -163,3 +163,5 @@ After that there are a lot of minor things, some of which i already mentioned th
 4. handle table of content jobs [NovelWorker#7](https://github.com/NovelService/NovelWorker/issues/7)
 5. Validate input url format [NovelRest#4](https://github.com/NovelService/NovelRest/issues/4)
 6. Add suffix to docker images [NovelRest#5](https://github.com/NovelService/NovelRest/issues/5) [NovelWorker#8](https://github.com/NovelService/NovelWorker/issues/8)
+
+I plan to have the project serve as an example of how all the aspects of CI/CD, docker, cloud are used in combination. There are many tutorials and examples available for a single of those steps, but complete projects are far in between. 
