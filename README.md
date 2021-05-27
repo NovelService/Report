@@ -46,6 +46,7 @@ Tests themself were excluded because they are not part of the curriculum of this
 Lasty I wanted to be able to use all of this from anywhere and maybe even an adjusted Novel2Go app. So it would need to be deployed somewhere. Ideally a single rest api instance and worker instance would be running at all times, with the possibility to scale the worker up based on usage.
 
 ### Architecturediagram
+![architecture](./architecture.svg)
 
 ## Implementation 1-2 pages
 Here I describe my implementation and problems of the project, which occured roughly in the outlined order.
