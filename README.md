@@ -1,3 +1,4 @@
+__WIP__
 # Report
 
 For the lecture "cloud computing" at "Hochschule für Technik Stuttgart".
@@ -140,3 +141,25 @@ Not handled.
 Not handled, no one of processes exists. Initial database schema creation is handled by spring boot.
 
 ## Conclusion half-full page
+### Summary
+Overall the project was an success. The first 4 points of the problem definition were achieved:
+1. Horizontal scalability is allowed by using a queue and multiple stateless worker services
+2. Complete dev enviroment setup is documented in the README
+3. Docker images can be found here [NovelRest](https://hub.docker.com/repository/docker/xiangronglin/novel-rest) and [NovelWorker](https://hub.docker.com/repository/docker/xiangronglin/novel-worker) and are updated on each push
+4. All PR and pushes are checked by an CI pipeline. Runs can be found here [NovelRest](https://github.com/NovelService/NovelRest/actions) and [NovelWorker](https://github.com/NovelService/NovelWorker/actions)
+
+### Findings
+Using docker from the start is a huge boon. All backing services can be started per command. Problems that would occur in the production enviroment can be found locally by running the app from an container instead of the IDE.
+
+There are also many free services for open source project and students, that one should use in order to get experience while they are available for free. JitPack for maven artifacts, sonarcloud for static code analysis, GitHub for CI/CD and code hosting
+
+### Next steps
+I plan to finish the last step of adding the CD pipeline and deploying the project into the cloud [NovelDeployer#1](https://github.com/NovelService/NovelDeployer/issues/1).
+
+After that there are a lot of minor things, some of which i already mentioned throughout the report. Up-to-date issues can be found in the respective repositories, but for now these are:
+1. Create and publish base image with readability and calibre preinstalled [NovelWorker#4](https://github.com/NovelService/NovelWorker/issues/4)
+2. split up into 2 workers [NovelWorker#5](https://github.com/NovelService/NovelWorker/issues/5)
+3. Return job on sigterm signal [NovelWorker#6](https://github.com/NovelService/NovelWorker/issues/6)
+4. handle table of content jobs [NovelWorker#7](https://github.com/NovelService/NovelWorker/issues/7)
+5. Validate input url format [NovelRest#4](https://github.com/NovelService/NovelRest/issues/4)
+6. Add suffix to docker images [NovelRest#5](https://github.com/NovelService/NovelRest/issues/5) [NovelWorker#8](https://github.com/NovelService/NovelWorker/issues/8)
