@@ -25,10 +25,9 @@ More specifically this means:
 4. CI pipeline which builds, tests and publishes artifacts (Tests themselve not included)
 5. CD pipeline to deploy to the web
 
-
 ## Approach full page
 ### Scalability by seperating web extraction & ebook generation from the web API
-I'm assuming that for a given job the worker will experience a way bigger workload than the api. Thus a single rest api instance could serve multiple worker instances.  
+I'm assumed that for a given job the worker will experience a way bigger workload than the api. Thus a single rest api instance could serve multiple worker instances.  
 For the minimal viable product I wrote everything in a single codebase. An api call would trigger an message into the messaging system, which in turn would trigger the extraction and generation. The resulting ebook would be saved to disk and returned by the rest api. This allowed me to painlessly split it up afterwards into a rest api and worker service.
 
 ### Easy setup of the development enviroment
@@ -58,6 +57,8 @@ Then copy over the Novel2GoExtractor code and try not to wonder what past me was
 
 ### Dockerization
 The part of installing readability and calibre that i portrayed as pretty easy turned out to be way more annoying than expected. After many trial and error attempts, because libraries were missing or outdated, I finally settled on a working version which can be found [here](https://github.com/NovelService/NovelWorker/blob/49f7d10a78093dfaa0c7c71fbcea56b83f56ec13/novel-worker-docker/Dockerfile). It felt like in the nodejs world. Just simply install everything that you need and don't wonder about the huge `node_modules` folder, in this case the __1.1GB__ image.
+
+This was also the first time, that the program was running on linux and not my windows. This brought to light that my implementation for calling the command line only worked on windows, because I was opening the program `cmd` from the process, which only exists on windows. I solved it for now with a simple if check and using `sh` on linux.
 
 ### Microservices
 This part also went comparetivly easy. Because i already implemented the monolith to work through the messaging system i could nearly just create a new spring boot project and copy over the infratructure and worker code. Only problem was the definition of the message format would have to be copied, in order to be available in both projects. This i solved in my point below.  
@@ -90,6 +91,52 @@ A new image currently just overrides the old one, which is fine for now, in orde
 TODO Seperate repo, trigger from worker and rest with repository_deploy event
 
 ## Evaluation in relation to lecture 1-2 pages
+Here i will evaluate my project based on the the requirements of a [Twelve-Factor App](https://12factor.net/)
 
+### I. Codebase
+Mostly checked: All the code is tracked with git and hosted on GitHub. There is some very small code duplication in the infrastructure classes, see `ConfigManager` and `AmqConfigurator`. This is acceptable, because they are only so similiar right now, because they contain very little configuration. Shared code is extracted into a library (`novel-worker-api`) and declared as dependency in both the worker and rest api.
+### II. Dependencies
+Maven is used as build system and thus all JVM dependecies are declared and packaged with the application itself. The 2 outlier CLI tools are covered by releasing the app as a docker image and not a jar.
+### III. Config
+The configuration is done through a file, which has to be mounted into the image in order to be loaded by the app on runtime. For the local dev enviroment, programm arguments were added to allow specifying where the default config files delivered with the projects are. Currently only very few values are configureable, because more was not needed, but the option to change them is there and very easy to realise.
+### IV. Backing services
+Backing services used by the worker is amq and by the rest api are amq and postgresql. For both the url and credentials are passed in through the config file, thus fullfilling this requirement.
+
+Whether the amq or postgresql service can be replaced on runtime is questionable. I would guess, that would throw an error with connection refused and not try to reconnect. But implementing an reconnect should be easy to achiev in order completly fullfill the requirement.
+### V. Build, release, run
+This is partly achieved. The project is build with GitHub actions with an CI job. If it was a push and not a PR then it also gets released immediatly. Nearly no changes can be made on runtime because kotlin, a compiled language, is used. Only changes to the enviroments can be made by accessing the container. This should not be possible, because i planned to not open the ssh port on the production build.
+
+### VI. Processes
+The services are completly stateless, meaning they achieved this point. On one hand there is the database with its own volume and on the other hand there is the `/novel` folder, in which a volume has to be mounted in. In this folder the worker service writes the finished ebooks and the rest api fetches them.
+
+### VII. Port binding
+This is also achieved. The build process produces an "fat-jar" which contains all dependecies which are needed for the app (minus the CLI libraries). As can be seen in the `Dockerfile` declaration, those can be directly run.
+
+### VIII. Concurrency
+This was achieved completly. Taking the given docker-compose in this repository, one can run `docker compose up --scale novel-worker=x`, where x describes how many instances of the novel worker should be started. By running
+```
+for i in {1..y}; 
+    do curl --location --request POST 'http://localhost:8080/novel/trigger' --header 'Content-Type: application/json' --data-raw '{"url": "https://insidethemirror1.wordpress.com/2021/05/16/chapter-18-reason/","tableOfContents": "false"}';
+done
+```
+,with y being how many request should be sent, with multiple workers, one can see that the initial assumption about a single rest api instance being able to serve multiple worker instances being true. One can monitor the usage with `docker stats`. With this the whole applciation can easily scale horizontally.
+
+### IX. Disposability
+This is not achieved. The startup time is short for jvm standards, because very little has to be done on statup besides loading the config and connecting to the datase and amq. What is missing, is returning jobs when the worker receives a SIGTERM signal. The resulting problem is that jobs may be cancelled due to SIGTERM, but not requeued and rerun, meaning they will never be finished.
+
+### X. Dev/prod parity
+Although no production environment exists, many points here could easily achieved. 
+
+The `time gap` is minimal, because each push to master triggers the CI pipeline which in turn triggers the CD pipeline, when successfull. The CD pipeline is missing, but if existant, new code would be running in production in a matter of minutes.
+
+The `personnal gap` can't be properly evaluated, because it is a single person project.
+
+The `tools gap` can be minized, by using the same images for the backing services as in the services. 
+
+### XI. Logs
+Not handled.
+
+### XII. Admin processes
+Not handled, no one of processes exists. Initial database schema creation is handled by spring boot.
 
 ## Conclusion half-full page
