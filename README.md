@@ -12,7 +12,9 @@ From Xiang Rong Lin for the lecture "cloud computing" at "Hochschule für Techni
 [Conclusion](#conclusion)  
 [Time tracking](#time_tracking)  
 
-<a name="motivation" />
+---
+
+<a name="motivation"/>
 
 ## Motivation
 I like to read web novel, but found reading on the phone very inconvenient because of its small screen size. Instead I would have hugely preferred to read it on my Kindle. Problem being how to get the website on the kindle, whose browser is very feature scarce.
@@ -26,7 +28,7 @@ At first I made an Android app [Novel2Go](https://github.com/XiangRongLin/Novel2
 Using the core of Novel2Go I made a private version which used CLI tool for desktop which way better results. [Firefox readability](https://github.com/mozilla/readability) library was used through an CLI wrapper for extracting the content and [calibre](https://calibre-ebook.com/) `ebook-convert` used to convert the html page to an eBook. ANY eBook format was possible with this.  
 But a java program which relies on the user having an JS CLI tool, thus NodeJS and NPM, and calibre installed is not very user friendly.
 
-<a name="problem_definition" />
+<a name="problem_definition"/>
 
 ## Problem definition
 With that in mind I wanted to make use of Docker by defining my own containers which had the necessary CLI tool pre-installed. In order to make it more interesting and to meet the complexity requirements of the lecture, I wanted to make a add all the "new and cool" stuff around a real project.  
@@ -38,7 +40,9 @@ More specifically this means:
 4. CI pipeline which builds, tests and publishes artifacts (Tests themselves not included)
 5. CD pipeline to deploy to the web
 
-<a name="approach" />
+---
+
+<a name="approach"/>
 
 ## Approach
 ### Scalability by separating web extraction & eBook generation from the web API
@@ -69,7 +73,9 @@ It can be only a single instance running all jobs sequentially or multiple runni
 After they are done the resulting e-Book gets written into a shared volume mount and a result message is sent back from NovelWorker to NovelRest through ActiveMQ.  
 Now the user can query the book from NovelRest, which retrieves it from the shared volume mount.
 
-<a name="implementation" />
+---
+
+<a name="implementation"/>
 
 ## Implementation
 Here I describe my implementation and problems of the project, which occurred roughly in the outlined order.
@@ -130,7 +136,9 @@ Otherwise a maven plugin would need to be included, which would upload the analy
 ### CD Deploy to the cloud
 This was not achieved due to personal time constraints
 
-<a name="evaluation" />
+---
+
+<a name="evaluation"/>
 
 ## Evaluation
 Here I will evaluate my project based on the the requirements of a [Twelve-Factor App](https://12factor.net/)
@@ -181,7 +189,9 @@ Not handled.
 ### XII. Admin processes
 Not handled, no one of processes exists. Initial database schema creation is handled by spring boot.
 
-<a name="conclusion" />
+---
+
+<a name="conclusion"/>
 
 ## Conclusion
 ### Summary
@@ -210,7 +220,9 @@ After that there are a lot of minor things, some of which I already mentioned th
 I plan to have the project serve as an complete example of how to develop cloud native.  
 There are many tutorials and examples available which dive into a single aspect, but complete projects are far in between. 
 
-<a name="time_tracking" />
+---
+
+<a name="time_tracking"/>
 
 ## Time tracking
 |When|How long (minutes)|What|
