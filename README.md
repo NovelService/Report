@@ -1,9 +1,19 @@
 __WIP__
 # Report
 
-For the lecture "cloud computing" at "Hochschule für Technik Stuttgart".
+From Xiang Rong Lin for the lecture "cloud computing" at "Hochschule für Technik Stuttgart".
 
-## Motivation half page
+## Table of contents
+[Motivation](#motivation)  
+[Problem definition](#problem_definition)  
+[Approach](#approach)  
+[Implementation](#implementation)  
+[Evaluation](#evaluation)  
+[Conclusion](#conclusion)  
+
+<a name="motivation" />
+
+## Motivation
 I like to read web novel, but found reading on the phone very inconvenient because of its small screen size. Instead I would have hugely preferred to read it on my Kindle. Problem being how to get the website on the kindle, whose browser is very feature scarce.
 
 ### Novel2Go
@@ -15,8 +25,9 @@ At first I made an Android app [Novel2Go](https://github.com/XiangRongLin/Novel2
 Using the core of Novel2Go I made a private version which used CLI tool for desktop which way better results. [Firefox readability](https://github.com/mozilla/readability) library was used through an CLI wrapper for extracting the content and [calibre](https://calibre-ebook.com/) `ebook-convert` used to convert the html page to an eBook. ANY eBook format was possible with this.  
 But a java program which relies on the user having an JS CLI tool, thus NodeJS and npm, and calibre installed is not very user friendly.
 
+<a name="problem_definition" />
 
-## Problem definition half-full page
+## Problem definition
 With that in mind I wanted to make use of Docker by defining my own containers which had the necessary CLI tool pre-installed. In order to make it more interesting and to meet the complexity requirements of the lecture, I wanted to make a add all the "new and cool" stuff around a real project.  
 More specifically this means:
 
@@ -26,7 +37,9 @@ More specifically this means:
 4. CI pipeline which builds, tests and publishes artifacts (Tests themselves not included)
 5. CD pipeline to deploy to the web
 
-## Approach full page
+<a name="approach" />
+
+## Approach
 ### Scalability by separating web extraction & eBook generation from the web API
 I'm assumed that for a given job the worker will experience a way bigger workload than the API. Thus a single rest API instance could serve multiple worker instances.  
 For the minimal viable product I wrote everything in a single codebase. An API call would trigger an message into the messaging system, which in turn would trigger the extraction and generation. The resulting eBook would be saved to disk and returned by the rest API. This allowed me to painlessly split it up afterwards into a rest API and worker service.
@@ -48,7 +61,9 @@ Lastly I wanted to be able to use all of this from anywhere and maybe even an ad
 ### Architecture diagram
 ![architecture](./architecture.svg)
 
-## Implementation 1-2 pages
+<a name="implementation" />
+
+## Implementation
 Here I describe my implementation and problems of the project, which occurred roughly in the outlined order.
 
 ### Monolith
@@ -92,7 +107,9 @@ A new image currently just overrides the old one, which is fine for now, in orde
 ### CD Deploy to the cloud
 TODO Separate repo, trigger from worker and rest with repository_deploy event
 
-## Evaluation in relation to lecture 1-2 pages
+<a name="evaluation" />
+
+## Evaluation
 Here I will evaluate my project based on the the requirements of a [Twelve-Factor App](https://12factor.net/)
 
 ### I. Codebase
@@ -141,7 +158,9 @@ Not handled.
 ### XII. Admin processes
 Not handled, no one of processes exists. Initial database schema creation is handled by spring boot.
 
-## Conclusion half-full page
+<a name="conclusion" />
+
+## Conclusion
 ### Summary
 Overall the project was an success. The first 4 points of the problem definition were achieved:
 1. Horizontal scalability is allowed by using a queue and multiple stateless worker services
@@ -165,4 +184,5 @@ After that there are a lot of minor things, some of which I already mentioned th
 5. Validate input URL format [NovelRest#4](https://github.com/NovelService/NovelRest/issues/4)
 6. Add suffix to docker images [NovelRest#5](https://github.com/NovelService/NovelRest/issues/5) [NovelWorker#8](https://github.com/NovelService/NovelWorker/issues/8)
 
-I plan to have the project serve as an example of how all the aspects of CI/CD, docker, cloud are used in combination. There are many tutorials and examples available for a single of those steps, but complete projects are far in between. 
+I plan to have the project serve as an complete example of how to develop cloud native.  
+There are many tutorials and examples available which dive into a single aspect, but complete projects are far in between. 
