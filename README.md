@@ -23,7 +23,7 @@ At first I made an Android app [Novel2Go](https://github.com/XiangRongLin/Novel2
 
 ### Novel2GoExtractor
 Using the core of Novel2Go I made a private version which used CLI tool for desktop which way better results. [Firefox readability](https://github.com/mozilla/readability) library was used through an CLI wrapper for extracting the content and [calibre](https://calibre-ebook.com/) `ebook-convert` used to convert the html page to an eBook. ANY eBook format was possible with this.  
-But a java program which relies on the user having an JS CLI tool, thus NodeJS and npm, and calibre installed is not very user friendly.
+But a java program which relies on the user having an JS CLI tool, thus NodeJS and NPM, and calibre installed is not very user friendly.
 
 <a name="problem_definition" />
 
@@ -59,7 +59,7 @@ Tests themselves were excluded because they are not part of the curriculum of th
 Lastly I wanted to be able to use all of this from anywhere and maybe even an adjusted Novel2Go app. So it would need to be deployed somewhere. Ideally a single rest API instance and worker instance would be running at all times, with the possibility to scale the worker up based on usage.
 
 ### Architecture diagram
-![architecture](./architecture.svg)
+![architecture](./images/architecture.svg)
 
 <a name="implementation" />
 
@@ -73,7 +73,7 @@ Then a maven project with Kotlin and Spring Boot for rapid initial development. 
 Then copy over the Novel2GoExtractor code and try not to wonder what past me was thinking writing that piece of code.
 
 ### Dockerization
-The part of installing readability and calibre that I portrayed as pretty easy turned out to be way more annoying than expected. After many trial and error attempts, because libraries were missing or outdated, I finally settled on a working version which can be found [here](https://github.com/NovelService/NovelWorker/blob/49f7d10a78093dfaa0c7c71fbcea56b83f56ec13/novel-worker-docker/Dockerfile). It felt like in the NodeJs world. Just simply install everything that you need and don't wonder about the huge `node_modules` folder, in this case the __1.1GB__ image.
+The part of installing readability and calibre that I portrayed as pretty easy turned out to be way more annoying than expected. After many trial and error attempts, because libraries were missing or outdated, I finally settled on a working version which can be found [here](https://github.com/NovelService/NovelWorker/blob/49f7d10a78093dfaa0c7c71fbcea56b83f56ec13/novel-worker-docker/Dockerfile). It felt like in the NodeJS world. Just simply install everything that you need and don't wonder about the huge `node_modules` folder, in this case the __1.1GB__ image.
 
 This was also the first time, that the program was running on Linux and not my windows. This brought to light that my implementation for calling the command line only worked on windows, because I was opening the program `cmd` from the process, which only exists on windows. I solved it for now with a simple if check and using `sh` on Linux.
 
@@ -97,15 +97,30 @@ I had big problems with the dependency version not being inherited to the submod
 Before the multi module setup it would also generate it fat jar, a jar which contains all necessary dependencies. This had to be configured afterwards.
 
 ### CI build, test, publish
-Here is used GitHub actions, because I'm very familiar with it and it's free for open source. The current version can be found [here](https://github.com/NovelService/NovelWorker/blob/49f7d10a78093dfaa0c7c71fbcea56b83f56ec13/.github/workflows/ci.yml) and in short it runs `mvn install` to build and test and `docker push` to publish the image.  
+Here is used GitHub actions, because I'm very familiar with it and it's free for open source.  
+The current version can be found [here](https://github.com/NovelService/NovelWorker/blob/49f7d10a78093dfaa0c7c71fbcea56b83f56ec13/.github/workflows/ci.yml) and in short it runs `mvn install` to build and test and `docker push` to publish the image.  
 
-Each job runs as a separate job, `mvn install` on push and pr, `docker push` only on push. But because each job has a completely new environment my `docker push` job didn't have access to the image from the `mvn install` job. I decided to solve it with the `upload-artifact` and `download-artifact` actions over just building it again, because I did want to add a job for end-to-end tests in the future, which would also need the image.
+Each command runs as a separate job, `mvn install` on push and PR, `docker push` only on push.
+But because each job has a completely new environment the `docker push` job does not have access to the image from the `mvn install` job.
+I decided to solve it with the `upload-artifact` and `download-artifact` actions over just building it again.
+Reason being that I want to add a job for end-to-end tests in the future, which would also need the image.
 
-The images can be found https://hub.docker.com/repository/docker/xiangronglin/novel-rest and https://hub.docker.com/repository/docker/xiangronglin/novel-worker
+The images can be found https://hub.docker.com/repository/docker/xiangronglin/novel-rest and https://hub.docker.com/repository/docker/xiangronglin/novel-worker  
 A new image currently just overrides the old one, which is fine for now, in order to not create too many images while it is still in the early stages of development.
 
+Additionally a static code analysis tool was integrated in the form of [sonarcloud](https://sonarcloud.io/).
+It offers its services for free for open source project and helps in producing cleaner code by analyzing it during each PR and push.
+For PR it also adds an comment with an quick overview of the quality of the changes
+
+[![sonarcloud_pr_comment](./images/sonarcloud_pr_comment.jpg)](https://github.com/NovelService/NovelRest/pull/2#issuecomment-846546261)
+
+Both projects [NovelRest](https://sonarcloud.io/dashboard?id=NovelService_NovelRest) and [NovelWorker](https://sonarcloud.io/dashboard?id=NovelService_NovelWorker) are using it.  
+The setup was especially easy because it offers an [Automatic Analysis](https://sonarcloud.io/documentation/analysis/automatic-analysis/) in specific cases.
+Both project fulfill those requirements.
+Otherwise a maven plugin would need to be included, which would upload the analysis result.
+
 ### CD Deploy to the cloud
-TODO Separate repo, trigger from worker and rest with repository_deploy event
+This was not achieved due to personal time constraints
 
 <a name="evaluation" />
 
@@ -171,7 +186,7 @@ Overall the project was an success. The first 4 points of the problem definition
 ### Findings
 Using docker from the start is a huge boon. All backing services can be started per command. Problems that would occur in the production environment can be found locally by running the app from an container instead of the IDE.
 
-There are also many free services for open source project and students, that one should use in order to get experience while they are available for free. JitPack for maven artifacts, sonarcloud for static code analysis, GitHub for CI/CD and code hosting
+There are also many free services for open source project and students, that one should use in order to get experience while they are available for free. [JitPack](https://jitpack.io/) for maven artifacts, [sonarcloud](https://sonarcloud.io/) for static code analysis, [GitHub](https://github.com/) for CI/CD and code hosting
 
 ### Next steps
 I plan to finish the last step of adding the CD pipeline and deploying the project into the cloud [NovelDeployer#1](https://github.com/NovelService/NovelDeployer/issues/1).
