@@ -275,7 +275,7 @@ After that there are a lot of minor things, some of which I already mentioned th
 5. Validate input URL format [NovelRest#4](https://github.com/NovelService/NovelRest/issues/4)
 6. Add suffix to docker images [NovelRest#5](https://github.com/NovelService/NovelRest/issues/5) [NovelWorker#8](https://github.com/NovelService/NovelWorker/issues/8)
 
-I plan to have the project serve as an complete example of how to develop cloud native.  
+I plan to have the project serve as an complete example of how to develop cloud native and expand it accordingly.  
 There are many tutorials and examples available which dive into a single aspect, but complete projects are far in between. 
 
 ---
