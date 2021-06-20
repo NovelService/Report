@@ -62,6 +62,13 @@ Lastly I wanted to be able to use all of this from anywhere and maybe even an ad
 ### Architecture diagram
 ![architecture](./images/architecture.svg)
 
+A user can only interact with NovelRest and trigger a job to download and convert an e-Book.  
+Then some meta data of the job gets saved into the database and the job gets queued into ActiveMQ.  
+Any of the NovelWorker instances can then dequeue the job and work on it.
+It can be only a single instance running all jobs sequentially or multiple running them in parallel.  
+After they are done the resulting e-Book gets written into a shared volume mount and a result message is sent back from NovelWorker to NovelRest through ActiveMQ.  
+Now the user can query the book from NovelRest, which retrieves it from the shared volume mount.
+
 <a name="implementation" />
 
 ## Implementation
