@@ -10,6 +10,7 @@ From Xiang Rong Lin for the lecture "cloud computing" at "Hochschule für Techni
 [Implementation](#implementation)  
 [Evaluation](#evaluation)  
 [Conclusion](#conclusion)  
+[Time tracking](#time_tracking)  
 
 <a name="motivation" />
 
@@ -201,3 +202,23 @@ After that there are a lot of minor things, some of which I already mentioned th
 
 I plan to have the project serve as an complete example of how to develop cloud native.  
 There are many tutorials and examples available which dive into a single aspect, but complete projects are far in between. 
+
+<a name="time_tracking" />
+
+## Time tracking
+|When|How long (minutes)|What|
+|---|---|---|
+|07.05.2021|90|spring with 2 endpoints, docker compose with postgresl|
+|08.05.2021|90|inject config and save/retrieve from db|
+|08.05.2021|90|amq integration, send and receive message. copy over extractor from private project|
+|16.05.2021|50|Integrate extractor for single downloads|
+|21.05.2021|60|file service for persistent file saving|
+|21.05.2021|60|endpoint for fetching files and some bugs|
+|21.05.2021|180|dockerize, get calibre installed correctly, mount volumes correctly|
+|22.05.2021|300|Extract worker into separate codebase/microservice as maven multimodule project with seperate module for dto format|
+|23.05.2021|240|Finish dockerization of both services. Create proper fat jars. Add ci job with mvn install and docker push|
+|23.05.2021|120|Trigger Deployment repo job on worker/rest changes. Research deployment methods|
+|24.05.2021|150|Report: Motivation, Approach, Implementation, Evaluation|
+|26.05.2021|90|Novel-rest bugfixing, prepare live demo|
+|27.05.2021|60|Report: Evaluation, conclusion. first version finished|
+|27.05.2021|20|architecture diagram|
