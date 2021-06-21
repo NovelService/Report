@@ -1,4 +1,3 @@
-__WIP__
 # Report
 
 From Xiang Rong Lin for the lecture "cloud computing" at "Hochschule für Technik Stuttgart".
