@@ -3,13 +3,14 @@
 From Xiang Rong Lin for the lecture "cloud computing" at "Hochschule für Technik Stuttgart".
 
 ## Table of contents
-[Motivation](#motivation)  
-[Problem definition](#problem_definition)  
-[Approach](#approach)  
-[Implementation](#implementation)  
-[Evaluation](#evaluation)  
-[Conclusion](#conclusion)  
-[Time tracking](#time_tracking)  
+- [Motivation](#motivation)  
+- [Problem definition](#problem_definition)  
+- [Approach](#approach)  
+  - [Architecture diagram](#architecture_diagram)  
+- [Implementation](#implementation)  
+- [Evaluation](#evaluation)  
+- [Conclusion](#conclusion)  
+- [Time tracking](#time_tracking)  
 
 ---
 
@@ -73,6 +74,8 @@ Tests themselves were excluded because they are not part of the curriculum of th
 Lastly I wanted to be able to use all of this from anywhere and maybe even an adjusted Novel2Go app.
 So it would need to be deployed somewhere.
 Ideally a single rest API instance and worker instance would be running at all times, with the possibility to scale the worker up based on usage.
+
+<a name="architecture_diagram"/>
 
 ### Architecture diagram
 ![architecture](./images/architecture.svg)
