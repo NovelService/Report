@@ -1,6 +1,7 @@
 # Report
 
-From Xiang Rong Lin for the lecture "cloud computing" at "Hochschule für Technik Stuttgart".
+From Xiang Rong Lin for the lecture "cloud computing" at "Hochschule für Technik Stuttgart".  
+It's content are based on v0.1.0 of [NovelWorker](https://github.com/NovelService/NovelWorker/releases/tag/v0.1.0) and [NovelRest](https://github.com/NovelService/NovelRest/releases/tag/v0.1.0)
 
 ## Table of contents
 - [Motivation](#motivation)  
